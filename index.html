@@ -294,7 +294,7 @@
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && this.value === '') {
                         const prevDot = this.parentElement.previousElementSibling;
-                        if (prevDot && prevDot.classList && prevDot.classList.contains('ip-dot')) {
+                        if (prevDot && prevDot.classList.contains('ip-dot')) {
                             const prevInput = prevDot.previousElementSibling;
                             if (prevInput && prevInput.classList.contains('ip-octet')) {
                                 prevInput.focus();
