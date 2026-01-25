@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Landing Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+        }
+
+        .logo-placeholder {
+            color: #999;
+            font-size: 14px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <div class="logo-placeholder">Logo Space</div>
+        </div>
+        
+        <h1>Tablet Kiosk</h1>
+        
+        <div class="form-group">
+            <label for="address">Address:</label>
+            <input 
+                type="text" 
+                id="address" 
+                value="http://192.168.1.21/tablet_scoring_link"
+                placeholder="Enter address"
+            >
+        </div>
+        
+        <button onclick="navigateToAddress()">Go to Address</button>
+        
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+            }, 5000);
+        }
+
+        function navigateToAddress() {
+            const addressInput = document.getElementById('address');
+            const address = addressInput.value.trim();
+            
+            if (!address) {
+                showError('Please enter a valid address');
+                return;
+            }
+            
+            // Validate URL starts with http:// or https:// for security
+            if (!address.startsWith('http://') && !address.startsWith('https://')) {
+                showError('Address must start with http:// or https://');
+                return;
+            }
+            
+            // Validate URL format using URL constructor
+            try {
+                const url = new URL(address);
+                // Double-check protocol after parsing
+                if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                    showError('Only HTTP and HTTPS protocols are allowed');
+                    return;
+                }
+                window.location.href = address;
+            } catch (e) {
+                showError('Please enter a valid URL');
+            }
+        }
+
+        // Allow pressing Enter in the textbox to navigate
+        document.getElementById('address').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                navigateToAddress();
+            }
+        });
+    </script>
+</body>
+</html>
