@@ -165,7 +165,18 @@
                 return;
             }
             
-            window.location.href = address;
+            // Validate URL format using URL constructor
+            try {
+                const url = new URL(address);
+                // Double-check protocol after parsing
+                if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+                    showError('Only HTTP and HTTPS protocols are allowed');
+                    return;
+                }
+                window.location.href = address;
+            } catch (e) {
+                showError('Please enter a valid URL');
+            }
         }
 
         // Allow pressing Enter in the textbox to navigate
