@@ -115,6 +115,49 @@
         .error-message.show {
             display: block;
         }
+
+        .ip-octets-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ip-octet-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        input[type="text"].ip-octet {
+            width: 60px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"].ip-octet:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ip-dot {
+            color: #333;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .ip-octets-label {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 600;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
@@ -124,6 +167,19 @@
         </div>
         
         <h1>Tablet Kiosk</h1>
+        
+        <div class="ip-octets-label">Host IP Address:</div>
+        <div class="ip-octets-container">
+            <div class="ip-octet-group">
+                <input type="text" class="ip-octet" id="octet1" maxlength="3" value="192">
+                <span class="ip-dot">.</span>
+                <input type="text" class="ip-octet" id="octet2" maxlength="3" value="168">
+                <span class="ip-dot">.</span>
+                <input type="text" class="ip-octet" id="octet3" maxlength="3" value="1">
+                <span class="ip-dot">.</span>
+                <input type="text" class="ip-octet" id="octet4" maxlength="3" value="21">
+            </div>
+        </div>
         
         <div class="form-group">
             <label for="address">Address:</label>
@@ -141,6 +197,120 @@
     </div>
 
     <script>
+        // Initialize octets from the address field on page load
+        function initializeOctets() {
+            const addressInput = document.getElementById('address');
+            const address = addressInput.value;
+            
+            // Extract IP address from the URL
+            try {
+                const url = new URL(address);
+                const hostname = url.hostname;
+                
+                // Check if hostname is an IP address
+                const ipPattern = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+                const match = hostname.match(ipPattern);
+                
+                if (match) {
+                    document.getElementById('octet1').value = match[1];
+                    document.getElementById('octet2').value = match[2];
+                    document.getElementById('octet3').value = match[3];
+                    document.getElementById('octet4').value = match[4];
+                }
+            } catch (e) {
+                // If URL parsing fails, keep default values
+                console.error('Failed to parse URL:', e);
+            }
+        }
+
+        // Update address field when octets change
+        function updateAddressFromOctets() {
+            const octet1 = document.getElementById('octet1').value;
+            const octet2 = document.getElementById('octet2').value;
+            const octet3 = document.getElementById('octet3').value;
+            const octet4 = document.getElementById('octet4').value;
+            
+            // Validate each octet
+            const octets = [octet1, octet2, octet3, octet4];
+            let isValid = true;
+            
+            for (let octet of octets) {
+                const num = parseInt(octet, 10);
+                if (isNaN(num) || num < 0 || num > 255 || octet === '') {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            if (isValid) {
+                const addressInput = document.getElementById('address');
+                const currentAddress = addressInput.value;
+                
+                try {
+                    const url = new URL(currentAddress);
+                    // Update the hostname with the new IP address
+                    const newIP = `${octet1}.${octet2}.${octet3}.${octet4}`;
+                    url.hostname = newIP;
+                    addressInput.value = url.toString();
+                } catch (e) {
+                    // If current address is not a valid URL, create a new one
+                    const newIP = `${octet1}.${octet2}.${octet3}.${octet4}`;
+                    addressInput.value = `http://${newIP}/tablet_scoring_link`;
+                }
+            }
+        }
+
+        // Add event listeners to octet inputs
+        function setupOctetListeners() {
+            const octetInputs = document.querySelectorAll('.ip-octet');
+            
+            octetInputs.forEach(input => {
+                // Update address on input change
+                input.addEventListener('input', function(e) {
+                    // Only allow numbers
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    
+                    // Limit to 255
+                    if (parseInt(this.value, 10) > 255) {
+                        this.value = '255';
+                    }
+                    
+                    updateAddressFromOctets();
+                    
+                    // Auto-advance to next field if 3 digits entered
+                    if (this.value.length === 3) {
+                        const nextInput = this.parentElement.nextElementSibling;
+                        if (nextInput && nextInput.classList.contains('ip-dot')) {
+                            const nextOctet = nextInput.nextElementSibling;
+                            if (nextOctet && nextOctet.classList.contains('ip-octet')) {
+                                nextOctet.focus();
+                                nextOctet.select();
+                            }
+                        }
+                    }
+                });
+                
+                // Handle backspace to move to previous field
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value === '') {
+                        const prevDot = this.parentElement.previousElementSibling;
+                        if (prevDot && prevDot.classList.contains('ip-dot')) {
+                            const prevInput = prevDot.previousElementSibling;
+                            if (prevInput && prevInput.classList.contains('ip-octet')) {
+                                prevInput.focus();
+                                prevInput.select();
+                            }
+                        }
+                    }
+                    
+                    // Allow Enter to navigate
+                    if (e.key === 'Enter') {
+                        navigateToAddress();
+                    }
+                });
+            });
+        }
+
         function showError(message) {
             const errorElement = document.getElementById('errorMessage');
             errorElement.textContent = message;
@@ -185,6 +355,10 @@
                 navigateToAddress();
             }
         });
+
+        // Initialize on page load
+        initializeOctets();
+        setupOctetListeners();
     </script>
 </body>
 </html>
