@@ -103,6 +103,18 @@
         button:active {
             transform: translateY(0);
         }
+
+        .error-message {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -124,18 +136,36 @@
         </div>
         
         <button onclick="navigateToAddress()">Go to Address</button>
+        
+        <div class="error-message" id="errorMessage"></div>
     </div>
 
     <script>
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            setTimeout(() => {
+                errorElement.classList.remove('show');
+            }, 5000);
+        }
+
         function navigateToAddress() {
             const addressInput = document.getElementById('address');
             const address = addressInput.value.trim();
             
-            if (address) {
-                window.location.href = address;
-            } else {
-                alert('Please enter a valid address');
+            if (!address) {
+                showError('Please enter a valid address');
+                return;
             }
+            
+            // Validate URL starts with http:// or https:// for security
+            if (!address.startsWith('http://') && !address.startsWith('https://')) {
+                showError('Address must start with http:// or https://');
+                return;
+            }
+            
+            window.location.href = address;
         }
 
         // Allow pressing Enter in the textbox to navigate
