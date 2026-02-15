@@ -158,6 +158,36 @@
             font-weight: 600;
             font-size: 16px;
         }
+
+        .tatami-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tatami-button {
+            padding: 12px;
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tatami-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .tatami-button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 
@@ -172,7 +202,14 @@
 
         <h1>Kata Scoring Tablet</h1>
 
-        <div class="ip-octets-label">IP Address of Scorekeeping Laptop (tatami 1 = 11, tatami 2 = 12, tatami 3 = 13, tatami 4 = 14):</div>
+        <div class="tatami-buttons">
+            <button class="tatami-button" onclick="setTatamiIP(11)">Tatami 1</button>
+            <button class="tatami-button" onclick="setTatamiIP(12)">Tatami 2</button>
+            <button class="tatami-button" onclick="setTatamiIP(13)">Tatami 3</button>
+            <button class="tatami-button" onclick="setTatamiIP(14)">Tatami 4</button>
+        </div>
+
+        <div class="ip-octets-label">IP Address of Scorekeeping Laptop:</div>
         <div class="ip-octets-container">
             <div class="ip-octet-group">
                 <input type="text" class="ip-octet" id="octet1" maxlength="3" value="192" inputmode="numeric" pattern="[0-9]*">
@@ -197,6 +234,18 @@
     </div>
 
     <script>
+        // Set IP address for a specific Tatami
+        function setTatamiIP(lastOctet) {
+            // Set the octets
+            document.getElementById('octet1').value = '192';
+            document.getElementById('octet2').value = '168';
+            document.getElementById('octet3').value = '96';
+            document.getElementById('octet4').value = lastOctet.toString();
+            
+            // Update the address field
+            updateAddressFromOctets();
+        }
+
         // Initialize octets from the address field on page load
         function initializeOctets() {
             const addressInput = document.getElementById('address');
