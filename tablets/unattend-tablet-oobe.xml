@@ -678,10 +678,8 @@ Set-WallpaperColor -HtmlColor '#404060';
 		</File>
 		<File path="C:\Windows\Setup\Scripts\unattend-01.cmd">
 powercfg -change -standby-timeout-ac 0
-		</File>
-		<File path="C:\Windows\Setup\Scripts\unattend-02.cmd">
-mkdir c:\installers
-copy d:\installers-tablet\*.* c:\installers\
+powercfg -change -monitor-timeout-ac 60
+
 		</File>
 		<File path="C:\Windows\Setup\Scripts\Specialize.ps1">
 $scripts = @(
@@ -798,6 +796,9 @@ $scripts = @(
 		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\FontSmoothing" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
 		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\ListBoxSmoothScrolling" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
 		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\DropShadow" -Name 'DefaultValue' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AutoRotation" -Name 'Enable' -Value 0 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AutoRotation" -Name 'LastOrientation' -Value 1 -Type 'DWord' -Force;
+		Set-ItemProperty -LiteralPath "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\AutoRotation" -Name 'SensorPresent' -Value 1 -Type 'DWord' -Force;
 	};
 	{
 		reg.exe add "HKU\.DEFAULT\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 10 /f;
@@ -1058,15 +1059,21 @@ $scripts = @(
 		} | Remove-Item -Force -Recurse -Verbose;
 	};
 	{
-		C:\Windows\Setup\Scripts\unattend-02.cmd;
-	};
-	{
 		Remove-Item -LiteralPath @(
 		  'C:\Windows\Panther\unattend.xml';
 		  'C:\Windows\Panther\unattend-original.xml';
 		  'C:\Windows\Setup\Scripts\Wifi.xml';
 		) -Force -ErrorAction 'SilentlyContinue' -Verbose;
 	};
+    {
+        Remove-LocalUser -Name "tourn" -ErrorAction 'SilentlyContinue';
+        $url = "https://raw.githubusercontent.com/bpdohall/kns-landing-page/refs/heads/main/index.html"
+        $output = "c:\installers\index.html"
+        Invoke-WebRequest -Uri $url -OutFile $output
+        $url = "https://raw.githubusercontent.com/bpdohall/kns-landing-page/refs/heads/main/tablets/Scoring%20Tablet.lnk"
+		$output = "c:\users\kns\Desktop\Scoring Tablet.lnk"
+		Invoke-WebRequest -Uri $url -OutFile $output
+    };
 );
 
 &amp; {
